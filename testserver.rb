@@ -12,10 +12,12 @@ end
 get '/users' do
   names = Array.new(100) { Faker::Name.name }
   content_type :json
-  ['foo', 'bar'].to_json
+  ['foo', 'bar', 'textX'].to_json
 end
 
 post '/showme' do
+  content_type :text
+  params.inspect
 end
 
 __END__
