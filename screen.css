@@ -1,0 +1,36 @@
+*                 { margin: 0; padding: 0 }
+html              { font-size: 76%; font-family: Lucida Grande, sans-serif }
+ul                { list-style-type: none }
+input             { font-size: 1em; padding: 3px; border: 1px solid #000; width: 26em  }
+#wrap             { 
+  font-size: 1.1em;
+  margin: 0 auto; 
+  margin-top: 40px; 
+  border: 1px solid #ccc; 
+  min-height: 300px; 
+  width: 600px;
+  padding: 10px
+}
+
+/* Listface */
+.listface                 { overflow: hidden; border: 1px solid #000; width: 26em }
+.listface input           { border: 0 none; width: 16em }
+.listface li              { float: left; margin-right: 3px; }
+.listface .selected       { 
+  padding: 4px; 
+  font-size: 0.9em;
+  margin: 2px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  background-color: #e9eee0;
+}
+.listface .selected a     { text-decoration: none; margin-left: 3px; font-weight: bold; color: #8da45e }
+.listface-items           { 
+  position: absolute; 
+  display: none; 
+  background-color: #fff; 
+  padding: 5px; 
+  border: 1px solid #ccc;
+  font-size: 90% 
+}
+.listface-items .focused  { color: #000; background-color: #e0e1ee }
