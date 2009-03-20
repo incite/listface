@@ -1,30 +1,33 @@
-$.fn.swap = function(b) {
-  var b = jQuery(b)[0];
-  var a = this[0];
-  var a2 = a.cloneNode(true);
-  var b2 = b.cloneNode(true);
-  var stack = this;
-  a.parentNode.replaceChild(b2, a); 
-  b.parentNode.replaceChild(a2, b); 
-  stack[0] = a2; 
-  return this.pushStack( stack );
-};
-
 (function($) {
+  
+  // Utility methods
+  jQuery.fn.extend({
+    swap: function(b) {
+      var b = jQuery(b)[0];
+      var a = this[0];
+      var a2 = a.cloneNode(true);
+      var b2 = b.cloneNode(true);
+      var stack = this;
+      a.parentNode.replaceChild(b2, a); 
+      b.parentNode.replaceChild(a2, b); 
+      stack[0] = a2; 
+      return this.pushStack( stack );    
+    },
+  })
+  
+  // $.listface()
   $.listface = function(textFieldId, options) {
     if (!($('#' + textFieldId).length)) throw "Couldn't find a text field with the ID specified";
     verify(options);
     init(textFieldId, options)
   }
   
-  // Public
-  
+  // Public  
   $.extend($.listface, {
     fields: {}
   })
   
   // Private
-  
   var KEY = {
 		UP: 38,
 		DOWN: 40,
@@ -38,7 +41,7 @@ $.fn.swap = function(b) {
 		BACKSPACE: 8
 	};
 	
-	var options, textField, list;
+	var options, textField, list, lastTyped, timeout;
 	
 	function init(textFieldId, opts) {
 	  textField = $('#' + textFieldId);
@@ -68,7 +71,6 @@ $.fn.swap = function(b) {
     })
     textField.blur(function() { clearFocus(); list.hide('slow', function() { $(this).empty() }) })
     textField.keydown(function(event) {
-      // Now here's where it gets sneaky
       switch(event.keyCode) {
         case KEY.UP:
           stepUp();
@@ -77,8 +79,6 @@ $.fn.swap = function(b) {
           stepDown();
           break;
         case KEY.TAB:
-          event.preventDefault();
-          break;
         case KEY.RETURN:
           event.preventDefault();
           if (list.focused) {
@@ -87,24 +87,38 @@ $.fn.swap = function(b) {
           }
           return false;
         default:
-          search()
+          // lastTyped = Math.round(new Date().getTime()/1000.0);
+          clearTimeout(timeout);
+          timeout = setTimeout(search, 500)
           break;
       }
     })
   }
   
   function search() {
-    $.getJSON(options.url, function(data) {
+    if (options.min && textField.val().length < (options.min - 1)) return false;
+    list.show('slow');
+    var url;
+    if (options.param) {
+      url = options.url + ['?', options.param, '=', textField.val().toLowerCase()].join('');
+    } else {
+      url = options.url
+    }
+    $.getJSON(url, function(data) {
       buildItemsList(data)
     })
   }
   
+  // Adds an item to the "selected" items list
   function add(item) {
     item.append('<a href="#">X</a>');
+    item.find('a').click(function() { item.remove() } );
     $('#listface-input').before(item.addClass('selected'));
     textField.val('');
+    list.hide();
   }
   
+  // Executed when the user presses the up arrow
   function stepUp() {
     if (!list.focused) return false;
     if (list.focused.prev()[0] == undefined) {
@@ -115,6 +129,7 @@ $.fn.swap = function(b) {
     }
   }
   
+  // Executed when the uses presses the down arrow
   function stepDown() {
     if (!list.focused) {
       setFocus(list.find('li:first-child'));
@@ -124,12 +139,14 @@ $.fn.swap = function(b) {
     }
   }
   
+  // Focus on an element of the list
   function setFocus(item) {
     if (list.focused) list.focused.removeClass('focused');
     $(item).addClass('focused');
     list.focused = item;
   }
   
+  // Clears the current focus
   function clearFocus() {
     list.focused = undefined;
     list.find('li').removeClass('focused');
@@ -138,7 +155,10 @@ $.fn.swap = function(b) {
   function buildItemsList(data) {
     list.empty();
     $(data).each(function() {
-      list.append('<li>' + this + '</li>');
+      li = $('<li>' + this + '</li>');
+      // li.hover(function() { $(this).addClass('focused') }, function() { $(this).removeClass('focused') } );
+      // li.click(function() { add($(this)) } )
+      list.append(li);
     })
   }
     
