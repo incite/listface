@@ -11,7 +11,7 @@
       a.parentNode.replaceChild(b2, a); 
       b.parentNode.replaceChild(a2, b); 
       stack[0] = a2; 
-      return this.pushStack( stack );    
+      return this.pushStack(stack)
     },
   })
   
@@ -36,7 +36,7 @@
 		BACKSPACE: 8
 	};
 	
-	var options, textField, originalTextField, form, items, timeout;
+	var options, textField, originalTextField, form, items, timeout, usesObject;
 	var mapping = [];
 	
 	function init(textFieldId, opts) {
@@ -44,14 +44,14 @@
 	  options = opts;
 	  form = originalTextField.parents('form');
 	  form.submit(function() { list.remove() })
+	  if (opts.attribute) usesObject = true;
     replaceWithList();
-    loadAutoComplete();
+    loadAutoComplete()
 	}
   
   // Replaces the text field with the necessary list element that 
   // will contain the results, etc.
   function replaceWithList() {
-    // originalTextField.replace()    
     list = $([
       '<ul id="listface-', originalTextField.attr('id'), '" class="listface">',
         '<li id="listface-input">',
@@ -62,15 +62,14 @@
     originalTextField.hide();
     originalTextField.before(list);
     textField = $('#listface-' + originalTextField.attr('id') + ' :input');
-    // textField.swap(list);
     $('#listface-' + originalTextField.attr('id')).after('<ul id="listface-items-' + originalTextField.attr('id') + '" class="listface-items"></ul>');
-    items = $('#listface-items-' + originalTextField.attr('id'));
+    items = $('#listface-items-' + originalTextField.attr('id'))
   }
   
   function loadAutoComplete() {
     textField.focus(function() {
       items.append('<li class="listface-hint">Start typing...</li>');
-      items.show('slow');
+      items.show('slow')
     })
     textField.blur(function() { clearFocus(); items.hide('slow', function() { $(this).empty() }) })
     textField.keydown(function(event) {
@@ -87,7 +86,7 @@
           if (textField.val() == "") form.trigger('submit');
           if (items.focused) {
             add(items.focused);
-            clearFocus();
+            clearFocus()
           }
           return false;
         case KEY.ESC:
@@ -96,7 +95,7 @@
           break;
         default:
           clearTimeout(timeout);
-          timeout = setTimeout(search, 500)
+          timeout = setTimeout(search, 500);
           break;
       }
     })
@@ -107,7 +106,7 @@
     items.show('slow');
     var url;
     if (options.param) {
-      url = options.url + ['?', options.param, '=', textField.val().toLowerCase()].join('');
+      url = options.url + ['?', options.param, '=', textField.val().toLowerCase()].join('')
     } else {
       url = options.url
     }
@@ -122,18 +121,18 @@
     syncMapping();
     item.append('<a href="#">X</a>');
     item.find('a').click(function() { 
-      mapping = $.grep(mapping, function(i) { return i != item })
-      item.remove()
-      syncMapping();
+      mapping = $.grep(mapping, function(i) { return i != item });
+      item.remove();
+      syncMapping()
     });
     $('#listface-input').before(item.addClass('selected'));
     textField.val('');
-    items.hide();
+    items.hide()
   }
   
   // Syncs what's in the mapping variable with the values in the originalTextField
   function syncMapping() {
-    var values = $.map(mapping, function(item) { return $(item.find('span')[0]).text() }).join(', ');
+    var values = $.map(mapping, function(item) { return $(item.find('span')[ (usesObject ? 1 : 0) ]).text() }).join(', ');
     originalTextField.val(values)
   }
   
@@ -144,7 +143,7 @@
       clearFocus();
       return false;
     } else {
-      setFocus(items.focused.prev());      
+      setFocus(items.focused.prev())
     }
   }
   
@@ -163,29 +162,42 @@
   function setFocus(item) {
     if (items.focused) items.focused.removeClass('focused');
     $(item).addClass('focused');
-    items.focused = item;
+    items.focused = item
   }
   
   // Clears the current focus
   function clearFocus() {
     items.focused = undefined;
-    items.find('li').removeClass('focused');
+    items.find('li').removeClass('focused')
   }
   
   function buildItemsList(data) {
     items.empty();
     $(data).each(function() {
-      li = $('<li><span>' + this + '</span></li>');
+      var li;
+      if (usesObject) {
+        li = $([
+          '<li>',
+            '<span>', this[options.attribute.name], '<span>',
+            '<span style="display: none">', this[options.attribute.value], '</span>',
+          '</li>'
+        ].join(''))
+      } else {
+        li = $('<li><span>' + this + '</span></li>');
+      }
       // li.hover(function() { $(this).addClass('focused') }, function() { $(this).removeClass('focused') } );
       // li.click(function() { add($(this)) } )
-      items.append(li);
+      items.append(li)
     })
   }
     
   // Ensures the options object has all the necessary properties
   function verify(options) {
-    if (!options || options == undefined)         { throw "You need to specify a set of options for listface" }
-    if (!options.url || options.url == undefined) { throw "You need to supply an URL argument to listface" }
+    if (!options || options == undefined)                                   { throw "You need to specify a set of options for listface" }
+    if (!options.url || options.url == undefined)                           { throw "You need to supply an URL argument to listface" }
+    if (options.attribute && typeof options.attribute != 'object')          { throw "attribute needs to be an object" }
+    if (options.attribute &&
+      (!("value" in options.attribute) || !("name" in options.attribute)))  { throw "attribute needs to have value and name" }
     // add further validation here
   }
 })(jQuery);

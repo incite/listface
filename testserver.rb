@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'rubygems'
 require 'sinatra'
 require 'json'
@@ -10,9 +11,9 @@ get '/' do
 end
 
 get '/users' do
-  names = Array.new(100) { Faker::Name.name }
+  names = Array.new(7) { { :id => rand(2000), :name => Faker::Name.name } }
   content_type :json
-  ['foo', 'bar', 'textX'].to_json
+  names.to_json
 end
 
 post '/showme' do
@@ -30,9 +31,9 @@ __END__
     %title facelist test server
     %link{:rel => 'stylesheet', :type => 'text/css', :href => '/screen.css'}
     %script{:type => 'text/javascript', :src => '/jquery-1.3.2.min.js'}
-    %script{:type => 'text/javascript', :src => '/listface.js'}
+    %script{:type => 'text/javascript', :src => '/jquery.listface.js'}
     :javascript
-      $(document).ready(function() { $.listface('users', { url: '/users', min: 2, param: 'query' }) })
+      $(document).ready(function() { $.listface('users', { url: '/users', min: 2, param: 'query', attribute: { value: 'id', name: 'name' } }) })
   %body
     #wrap
       = yield
