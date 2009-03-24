@@ -118,6 +118,7 @@
   
   // Adds an item to the "selected" items list
   function add(item) {
+    item.unbind('click');
     mapping.push(item);
     syncMapping();
     item.append('<a href="#">X</a>');
