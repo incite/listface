@@ -36,7 +36,7 @@
 		BACKSPACE: 8
 	};
 	
-	var options, textField, originalTextField, form, items, timeout, usesObject;
+	var options, textField, originalTextField, form, items, timeout, usesObject, list;
 	var mapping = [];
 	
 	function init(textFieldId, opts) {
@@ -94,6 +94,18 @@
           clearFocus();
           items.hide('slow', function() { $(this).empty() });
           break;
+        case KEY.BACKSPACE:
+          if (textField.val() == '') {
+            console.log('gotcha')
+            if (!list.find('.selected').length) return false;
+            if (items.focused && items.focused.hasClass('selected')) {
+              remove(items.focused);
+              clearFocus()
+            } else {
+              setFocus(list.find('.selected:last'));
+            }
+          }
+          break;
         default:
           clearTimeout(timeout);
           timeout = setTimeout(search, 500);
@@ -122,15 +134,17 @@
     mapping.push(item);
     syncMapping();
     item.append('<a href="#">X</a>');
-    item.find('a').click(function() { 
-      mapping = $.grep(mapping, function(i) { return i != item });
-      item.remove();
-      syncMapping()
-    });
+    item.find('a').click(function() { remove(item) });
     $('#listface-input').before(item.addClass('selected'));
     textField.val('');
   }
   
+  function remove(item) {
+    mapping = $.grep(mapping, function(i) { return i[0] != item[0] });
+    item.remove();
+    syncMapping()
+  }
+    
   // Syncs what's in the mapping variable with the values in the originalTextField
   function syncMapping() {
     var values = $.map(mapping, function(item) { return $(item.find('span')[ (usesObject ? 1 : 0) ]).text() }).join(', ');
@@ -140,7 +154,7 @@
   // Executed when the user presses the up arrow
   function stepUp() {
     if (!items.focused) return false;
-    if (items.focused.prev()[0] == undefined) {
+    if (items.focused.prev()[0] == undefined || items.focused.hasClass('selected')) {
       clearFocus();
       return false;
     } else {
@@ -151,7 +165,7 @@
   // Executed when the uses presses the down arrow
   function stepDown() {
     if (items.find('li:first-child').is('.listface-hint')) return false;
-    if (!items.focused) {
+    if (!items.focused || items.focused.hasClass('selected')) {
       setFocus(items.find('li:first-child'));
     } else {
       if (items.focused.next()[0] == undefined) return false;
@@ -169,7 +183,8 @@
   // Clears the current focus
   function clearFocus() {
     items.focused = undefined;
-    items.find('li').removeClass('focused')
+    items.find('li').removeClass('focused');
+    list.find('li').removeClass('focused')
   }
   
   function buildItemsList(data) {

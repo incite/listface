@@ -33,4 +33,5 @@ input             { font-size: 1em; padding: 3px; border: 1px solid #000; width:
   border: 1px solid #ccc;
   font-size: 90% 
 }
+.listface .focused        { color: #fff; background-color: #5e63a4 }
 .listface-items .focused  { color: #000; background-color: #e0e1ee }
