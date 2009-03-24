@@ -71,7 +71,7 @@
       items.append('<li class="listface-hint">Start typing...</li>');
       items.show('slow')
     })
-    textField.blur(function() { clearFocus(); items.hide('slow', function() { $(this).empty() }) })
+    textField.blur(function() { setTimeout(function() { clearFocus(); items.hide('slow', function() { $(this).empty() }) }, 100) })
     textField.keydown(function(event) {
       switch(event.keyCode) {
         case KEY.UP:
@@ -86,6 +86,7 @@
           if (textField.val() == "") form.trigger('submit');
           if (items.focused) {
             add(items.focused);
+            items.hide();
             clearFocus()
           }
           return false;
@@ -127,7 +128,6 @@
     });
     $('#listface-input').before(item.addClass('selected'));
     textField.val('');
-    items.hide()
   }
   
   // Syncs what's in the mapping variable with the values in the originalTextField
@@ -185,8 +185,8 @@
       } else {
         li = $('<li><span>' + this + '</span></li>');
       }
-      // li.hover(function() { $(this).addClass('focused') }, function() { $(this).removeClass('focused') } );
-      // li.click(function() { add($(this)) } )
+      li.hover(function() { $(this).addClass('focused') }, function() { $(this).removeClass('focused') } );
+      li.click(function() { add($(this)) } )
       items.append(li)
     })
   }
