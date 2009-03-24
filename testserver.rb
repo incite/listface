@@ -34,6 +34,7 @@ __END__
     %script{:type => 'text/javascript', :src => '/jquery.listface.js'}
     :javascript
       $(document).ready(function() { $.listface('users', { url: '/users', min: 2, param: 'query', attribute: { value: 'id', name: 'name' } }) })
+      $(document).ready(function() { $.listface('people', { url: '/users', min: 2, param: 'query', attribute: { value: 'id', name: 'name' } }) })
   %body
     #wrap
       = yield
@@ -42,5 +43,7 @@ __END__
 %form{:action => '/showme', :method => 'post'}
   %p
     %input{:type => 'text', :name => 'users', :id => 'users'}
+  %p
+    %input{:type => 'text', :name => 'people', :id => 'people'}
   %p
     %button{:type => 'submit'} Submit

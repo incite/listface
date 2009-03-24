@@ -9,14 +9,23 @@
     <script type="text/javascript" charset="utf-8" src="jquery.listface.js"></script>
     <script type="text/javascript" charset="utf-8">
       $(document).ready(function() { $.listface('users', { url: 'users.json', min: 2, attribute: { value: "id", name: "name" } }) })
+      $(document).ready(function() { $.listface('people', { url: 'users.json', min: 2, attribute: { value: "id", name: "name" } }) })
     </script>
   </head>
   <body>
     <div id="wrap">
       <form action="#" method="post" accept-charset="utf-8">
         <p>
+          <label>Users</label>
+        </p>
+        <p>
           <input type="text" name="users" value="" id="users" />
         </p>
+        <p>
+          <label>Other people</label>
+        </p>
+        <p>
+          <input type="text" name="people" value="" id="people">
         <p>
           <button type="submit">Submit</button>
         </p>
