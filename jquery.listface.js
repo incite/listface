@@ -18,10 +18,7 @@
   // $.listface()
   $.listface = function(textFieldId, options) {
     if (!($('#' + textFieldId).length)) throw "Couldn't find a text field with the ID specified";
-    verify(options);
-    init(textFieldId, options)
-  
-    // Private
+    
     var KEY = {
   		UP: 38,
   		DOWN: 40,
@@ -37,6 +34,11 @@
 	
   	var options, textField, originalTextField, form, items, timeout, usesObject, list;
   	var mapping = [];
+    
+    verify(options);
+    init(textFieldId, options)
+    preloadDefaults()
+  
 	
   	function init(textFieldId, opts) {
   	  originalTextField = $('#' + textFieldId);
@@ -207,11 +209,37 @@
       })
     }
     
+    // loads a string or an object as a list item
+    function load(item) {
+      // expect object if we're talking objects here
+      var li;
+      if (options.attribute) {
+        li = $([
+          '<li>',
+            '<span>', item[options.attribute.name], '<span>',
+            '<span style="display: none">', this[options.attribute.value], '<span>',
+          '</li>'
+        ].join(''))
+      } else {
+        li = $('<li></span>' + item + '</span></li>')
+      }
+      window.lo = li;
+      add(li);
+    }
+    
+    function preloadDefaults() {
+      if (!options.defaults) return false;
+      $(options.defaults).each(function() {
+        load(this);
+      });
+    }
+    
     // Ensures the options object has all the necessary properties
     function verify(options) {
       if (!options || options == undefined)                                   { throw "You need to specify a set of options for listface" }
       if (!options.url || options.url == undefined)                           { throw "You need to supply an URL argument to listface" }
       if (options.attribute && typeof options.attribute != 'object')          { throw "attribute needs to be an object" }
+      if (options.defaults && options.defaults.constructor != Array)             { throw "defaults needs to be an array" }
       if (options.attribute &&
         (!("value" in options.attribute) || !("name" in options.attribute)))  { throw "attribute needs to have value and name" }
       // add further validation here

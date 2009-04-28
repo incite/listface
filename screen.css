@@ -14,7 +14,7 @@ input             { font-size: 1em; padding: 3px; border: 1px solid #000; width:
 
 /* Listface */
 .listface                 { overflow: hidden; border: 1px solid #000; width: 26em }
-.listface input           { border: 0 none; width: 16em }
+.listface input           { border: 0 none; width: 100% }
 .listface li              { float: left; margin-right: 3px; }
 .listface .selected       { 
   padding: 4px; 

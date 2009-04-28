@@ -8,8 +8,15 @@
     <script type="text/javascript" charset="utf-8" src="jquery-1.3.2.min.js"></script>
     <script type="text/javascript" charset="utf-8" src="jquery.listface.js"></script>
     <script type="text/javascript" charset="utf-8">
-      $(document).ready(function() { $.listface('users', { url: 'users.json', min: 2, attribute: { value: "id", name: "name" } }) })
-      $(document).ready(function() { $.listface('people', { url: 'users.json', min: 2, attribute: { value: "id", name: "name" } }) })
+      $(document).ready(function() { $.listface('users',  { url: 'users.json', min: 2, attribute: { value: "id", name: "name" } }) })
+      $(document).ready(function() { 
+        $.listface('people', { 
+          url: 'users.json', 
+          min: 2, 
+          attribute: { value: "id", name: "name" },
+          defaults: [{id: 888, name: 'Bob'}]
+        });
+      })
     </script>
   </head>
   <body>
