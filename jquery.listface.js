@@ -18,7 +18,8 @@
   // $.listface()
   $.listface = function(textFieldId, options) {
     if (!($('#' + textFieldId).length)) throw "Couldn't find a text field with the ID specified";
-    
+  
+    // Private
     var KEY = {
   		UP: 38,
   		DOWN: 40,
@@ -34,17 +35,16 @@
 	
   	var options, textField, originalTextField, form, items, timeout, usesObject, list;
   	var mapping = [];
-    
+
     verify(options);
-    init(textFieldId, options)
-    preloadDefaults()
-  
+    init(textFieldId, options)  	
+  	preloadDefaults()
 	
   	function init(textFieldId, opts) {
   	  originalTextField = $('#' + textFieldId);
   	  options = opts;
   	  form = originalTextField.parents('form');
-  	  form.submit(function() { list.remove() })
+  	  form.submit(function() { list.remove(); originalTextField.show() })
   	  if (opts.attribute) usesObject = true;
       replaceWithList();
       loadAutoComplete()
@@ -136,15 +136,23 @@
       mapping.push(item);
       syncMapping();
       item.append('<a href="#">X</a>');
-      item.find('a').click(function() { remove(item) });
+      item.find('a').click(function(event) { event.preventDefault(); remove(item) });
       list.find('.listface-input').before(item.addClass('selected'));
       textField.val('');
+      if (options.maxEntries && list.find('li.selected').length >= options.maxEntries) {
+        textField.addClass('disabled');
+        textField.attr('disabled', 'disabled')
+      }
     }
   
     function remove(item) {
       mapping = $.grep(mapping, function(i) { return i[0] != item[0] });
       item.remove();
       syncMapping()
+      if (options.maxEntries && list.find('li.selected').length < options.maxEntries) {
+        textField.removeClass('disabled');
+        textField.removeAttr('disabled')
+      }
     }
     
     // Syncs what's in the mapping variable with the values in the originalTextField
@@ -208,13 +216,13 @@
         items.append(li)
       })
     }
-    
+
     // loads a string or an object as a list item
     function load(item) {
       // expect object if we're talking objects here
-      var li;
+      var li; 
       if (options.attribute) {
-        li = $([
+        li = $([ 
           '<li>',
             '<span>', item[options.attribute.name], '<span>',
             '<span style="display: none">', this[options.attribute.value], '<span>',
@@ -222,16 +230,16 @@
         ].join(''))
       } else {
         li = $('<li></span>' + item + '</span></li>')
-      }
-      window.lo = li;
+      }   
+      window.lo = li; 
       add(li);
-    }
+    }   
     
     function preloadDefaults() {
       if (!options.defaults) return false;
       $(options.defaults).each(function() {
         load(this);
-      });
+      }); 
     }
     
     // Ensures the options object has all the necessary properties
@@ -239,7 +247,7 @@
       if (!options || options == undefined)                                   { throw "You need to specify a set of options for listface" }
       if (!options.url || options.url == undefined)                           { throw "You need to supply an URL argument to listface" }
       if (options.attribute && typeof options.attribute != 'object')          { throw "attribute needs to be an object" }
-      if (options.defaults && options.defaults.constructor != Array)             { throw "defaults needs to be an array" }
+      if (options.defaults && options.defaults.constructor != Array)          { throw "defaults needs to be an array" }
       if (options.attribute &&
         (!("value" in options.attribute) || !("name" in options.attribute)))  { throw "attribute needs to have value and name" }
       // add further validation here
