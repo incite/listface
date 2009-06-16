@@ -1,13 +1,13 @@
-== Listface
+# Listface
 
 A plugin for text field / text area auto-completion, a la Facebook's "send a message" auto complete, or Facelist (http://blog.iantearle.com/javascript-goodness/facelist).
 
-== How it works
+# How it works
 
 The plugin adds a listface() method onto jQuery, which sets up a text field for using it. Said text field *must* have
 an assigned DOM ID, or else it won't work.
 
-== Example
+# Example
 
 $.listface('users', { url: 'users.json', min: 2, param: 'query', attribute: { value: "id", name: "name" } })
 
