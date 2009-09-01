@@ -25,7 +25,7 @@ input             { font-size: 1em; padding: 3px; border: 1px solid #000; width:
   background-color: #e9eee0;
 }
 .listface .selected a     { text-decoration: none; margin-left: 3px; font-weight: bold; color: #8da45e }
-.listface-items           { 
+.listface .items           { 
   position: absolute; 
   display: none; 
   background-color: #fff; 
@@ -34,4 +34,4 @@ input             { font-size: 1em; padding: 3px; border: 1px solid #000; width:
   font-size: 90% 
 }
 .listface .focused        { color: #fff; background-color: #5e63a4 }
-.listface-items .focused  { color: #000; background-color: #e0e1ee }
+.listface .items .focused  { color: #000; background-color: #e0e1ee }

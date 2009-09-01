@@ -16,8 +16,8 @@
   })
   
   // $.listface()
-  $.listface = function(textFieldId, options) {
-    if (!($('#' + textFieldId).length)) throw "Couldn't find a text field with the ID specified";
+  $.listface = function(selector, options) {
+    if (!($(selector).length)) throw "Couldn't find a text field with the ID specified";
   
     // Private
     var KEY = {
@@ -37,11 +37,11 @@
   	var mapping = [];
 
     verify(options);
-    init(textFieldId, options)  	
+    init(selector, options)  	
   	preloadDefaults()
 	
-  	function init(textFieldId, opts) {
-  	  originalTextField = $('#' + textFieldId);
+  	function init(selector, opts) {
+  	  originalTextField = $(selector);
   	  options = opts;
   	  form = originalTextField.parents('form');
   	  form.submit(function() { list.remove(); originalTextField.show() })
@@ -49,7 +49,7 @@
       replaceWithList();
       loadAutoComplete()
   	}
-  
+  	
     // Replaces the text field with the necessary list element that 
     // will contain the results, etc.
     function replaceWithList() {
@@ -57,19 +57,19 @@
         '<ul id="listface-', originalTextField.attr('id'), '" class="listface">',
           '<li class="listface-input">',
             '<input type="text" />',
+            '<ul class="items"></ul>',
           '</li>',
         '</ul>'
       ].join(''));
       originalTextField.hide();
       originalTextField.before(list);
       textField = $('#listface-' + originalTextField.attr('id') + ' :input');
-      $('#listface-' + originalTextField.attr('id')).after('<ul id="listface-items-' + originalTextField.attr('id') + '" class="listface-items"></ul>');
-      items = $('#listface-items-' + originalTextField.attr('id'))
+      items = $('#listface-' + originalTextField.attr('id') + ' ul.items');
     }
   
     function loadAutoComplete() {
       textField.focus(function() {
-        items.append('<li class="listface-hint">Start typing...</li>');
+        items.append('<li class="hint">' + (options.hint ? options.hint : 'Start typing...') + '</li>');
         items.show('slow')
       })
       textField.blur(function() { setTimeout(function() { clearFocus(); items.hide('slow', function() { $(this).empty() }) }, 100) })
@@ -174,7 +174,7 @@
   
     // Executed when the uses presses the down arrow
     function stepDown() {
-      if (items.find('li:first-child').is('.listface-hint')) return false;
+      if (items.find('li:first-child').is('.hint')) return false;
       if (!items.focused || items.focused.hasClass('selected')) {
         setFocus(items.find('li:first-child'));
       } else {
