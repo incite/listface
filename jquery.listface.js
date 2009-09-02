@@ -98,7 +98,6 @@
             break;
           case KEY.BACKSPACE:
             if (textField.val() == '') {
-              console.log('gotcha')
               if (!list.find('.selected').length) return false;
               if (items.focused && items.focused.hasClass('selected')) {
                 remove(items.focused);
@@ -125,9 +124,17 @@
       } else {
         url = options.url
       }
-      $.getJSON(url, function(data) {
-        buildItemsList(data)
+      $.getJSON(url, function(results) {
+        buildItemsList(excludeExistingEntries(results))
       })
+    }
+    
+    function excludeExistingEntries(results) {
+      results = $.grep(results, function(result) {
+        var id = (usesObject ? result[options.attribute.value] : result);
+        return $.inArray(id.toString(), $.map(mapping, function(item) { return $(item.find('span')[ (usesObject ? 1 : 0) ]).text() })) < 0
+      })
+      return results;
     }
   
     // Adds an item to the "selected" items list
@@ -174,7 +181,7 @@
   
     // Executed when the uses presses the down arrow
     function stepDown() {
-      if (items.find('li:first-child').is('.hint')) return false;
+      if (items.find('li:first-child').is('.hint') || items.find('li:first-child').is('.no_results')) return false;
       if (!items.focused || items.focused.hasClass('selected')) {
         setFocus(items.find('li:first-child'));
       } else {
@@ -199,22 +206,26 @@
   
     function buildItemsList(data) {
       items.empty();
-      $(data).each(function() {
-        var li;
-        if (usesObject) {
-          li = $([
-            '<li>',
-              '<span>', this[options.attribute.name], '<span>',
-              '<span style="display: none">', this[options.attribute.value], '</span>',
-            '</li>'
-          ].join(''))
-        } else {
-          li = $('<li><span>' + this + '</span></li>');
-        }
-        li.hover(function() { $(this).addClass('focused') }, function() { $(this).removeClass('focused') } );
-        li.click(function() { add($(this)) } )
-        items.append(li)
-      })
+      var li;
+      if ($(data).length) {
+        $(data).each(function() {
+          if (usesObject) {
+            li = $([
+              '<li>',
+                '<span>', this[options.attribute.name], '<span>',
+                '<span style="display: none">', this[options.attribute.value], '</span>',
+              '</li>'
+            ].join(''))
+          } else {
+            li = $('<li><span>' + this + '</span></li>');
+          }
+          li.hover(function() { $(this).addClass('focused') }, function() { $(this).removeClass('focused') } );
+          li.click(function() { add($(this)) } )
+        })        
+      } else {
+        li = $('<li class="no_results">No results found</li>');
+      }
+      items.append(li)
     }
 
     // loads a string or an object as a list item
