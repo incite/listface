@@ -1,5 +1,5 @@
 (function($) {
-  
+
   // Utility methods
   jQuery.fn.extend({
     swap: function(b) {
@@ -8,17 +8,21 @@
       var a2 = a.cloneNode(true);
       var b2 = b.cloneNode(true);
       var stack = this;
-      a.parentNode.replaceChild(b2, a); 
-      b.parentNode.replaceChild(a2, b); 
-      stack[0] = a2; 
+      a.parentNode.replaceChild(b2, a);
+      b.parentNode.replaceChild(a2, b);
+      stack[0] = a2;
       return this.pushStack(stack)
     },
   })
-  
+
   // $.listface()
   $.listface = function(selector, options) {
-    if (!($(selector).length)) throw "Couldn't find a text field with the ID specified";
-  
+    if (!$(selector).length) throw "Couldn't find a text field with the ID specified";
+    
+    $.extend($.listface, {
+      reset: function(selector) { reset(selector) }
+    })
+
     // Private
     var KEY = {
   		UP: 38,
@@ -32,7 +36,7 @@
   		PAGEDOWN: 34,
   		BACKSPACE: 8
   	};
-	
+
   	var options, textField, originalTextField, form, items, timeout, usesObject, list;
   	var mapping = [];
 
@@ -50,7 +54,7 @@
       loadAutoComplete()
   	}
   	
-    // Replaces the text field with the necessary list element that 
+    // Replaces the text field with the necessary list element that
     // will contain the results, etc.
     function replaceWithList() {
       list = $([
@@ -62,15 +66,25 @@
         '</ul>'
       ].join(''));
       originalTextField.hide();
+      originalTextField.data('listfaceopts', options);
       originalTextField.before(list);
       textField = $('#listface-' + originalTextField.attr('id') + ' :input');
       items = $('#listface-' + originalTextField.attr('id') + ' ul.items');
     }
-  
+    
+    function reset(selector) {
+      $(selector).prev('ul.listface').remove();
+      $.listface(selector, $(selector).data('listfaceopts'))
+    }
+
     function loadAutoComplete() {
       textField.focus(function() {
-        items.append('<li class="hint">' + (options.hint ? options.hint : 'Start typing...') + '</li>');
-        items.show('slow')
+        items
+          .find('li')
+            .remove()
+            .end()
+          .append('<li class="hint">' + (options.hint ? options.hint : 'Start typing...') + '</li>')
+          .show('slow')
       })
       textField.blur(function() { setTimeout(function() { clearFocus(); items.hide('slow', function() { $(this).empty() }) }, 100) })
       textField.keydown(function(event) {
@@ -108,13 +122,14 @@
             }
             break;
           default:
+            clearFocus();
             clearTimeout(timeout);
             timeout = setTimeout(search, 500);
             break;
         }
       })
     }
-  
+
     function search() {
       if (options.min && textField.val().length < (options.min - 1)) return false;
       items.show('slow');
@@ -128,7 +143,7 @@
         buildItemsList(excludeExistingEntries(results))
       })
     }
-    
+
     function excludeExistingEntries(results) {
       results = $.grep(results, function(result) {
         var id = (usesObject ? result[options.attribute.value] : result);
@@ -136,7 +151,7 @@
       })
       return results;
     }
-  
+
     // Adds an item to the "selected" items list
     function add(item) {
       item.unbind('click');
@@ -151,7 +166,7 @@
         textField.attr('disabled', 'disabled')
       }
     }
-  
+
     function remove(item) {
       mapping = $.grep(mapping, function(i) { return i[0] != item[0] });
       item.remove();
@@ -161,13 +176,13 @@
         textField.removeAttr('disabled')
       }
     }
-    
+
     // Syncs what's in the mapping variable with the values in the originalTextField
     function syncMapping() {
       var values = $.map(mapping, function(item) { return $(item.find('span')[ (usesObject ? 1 : 0) ]).text() }).join(', ');
       originalTextField.val(values)
     }
-  
+
     // Executed when the user presses the up arrow
     function stepUp() {
       if (!items.focused) return false;
@@ -178,7 +193,7 @@
         setFocus(items.focused.prev())
       }
     }
-  
+
     // Executed when the uses presses the down arrow
     function stepDown() {
       if (items.find('li:first-child').is('.hint') || items.find('li:first-child').is('.no_results')) return false;
@@ -189,21 +204,21 @@
         setFocus(items.focused.next());
       }
     }
-  
+
     // Focus on an element of the list
     function setFocus(item) {
       if (items.focused) items.focused.removeClass('focused');
       $(item).addClass('focused');
       items.focused = item
     }
-  
+
     // Clears the current focus
     function clearFocus() {
       items.focused = undefined;
       items.find('li').removeClass('focused');
       list.find('li').removeClass('focused')
     }
-  
+
     function buildItemsList(data) {
       items.empty();
       var li;
@@ -212,7 +227,7 @@
           if (usesObject) {
             li = $([
               '<li>',
-                '<span>', this[options.attribute.name], '<span>',
+                '<span>', this[options.attribute.name], '</span>',
                 '<span style="display: none">', this[options.attribute.value], '</span>',
               '</li>'
             ].join(''))
@@ -221,9 +236,9 @@
           }
           li.hover(function() { $(this).addClass('focused') }, function() { $(this).removeClass('focused') } );
           li.click(function() { add($(this)) } )
-        })        
+        })
       } else {
-        li = $('<li class="no_results">No results found</li>');
+        li = $('<li class="no_results">' + (options.no_results ? options.no_results : 'No results found') + '</li>');
       }
       items.append(li)
     }
@@ -231,28 +246,28 @@
     // loads a string or an object as a list item
     function load(item) {
       // expect object if we're talking objects here
-      var li; 
+      var li;
       if (options.attribute) {
-        li = $([ 
+        li = $([
           '<li>',
-            '<span>', item[options.attribute.name], '<span>',
-            '<span style="display: none">', this[options.attribute.value], '<span>',
+            '<span>', item[options.attribute.name], '</span>',
+            '<span style="display: none">', this[options.attribute.value], '</span>',
           '</li>'
         ].join(''))
       } else {
         li = $('<li></span>' + item + '</span></li>')
-      }   
-      window.lo = li; 
+      }
+      window.lo = li;
       add(li);
-    }   
-    
+    }
+
     function preloadDefaults() {
       if (!options.defaults) return false;
       $(options.defaults).each(function() {
         load(this);
-      }); 
+      });
     }
-    
+
     // Ensures the options object has all the necessary properties
     function verify(options) {
       if (!options || options == undefined)                                   { throw "You need to specify a set of options for listface" }
